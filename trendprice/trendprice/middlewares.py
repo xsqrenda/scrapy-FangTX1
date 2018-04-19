@@ -193,7 +193,7 @@ class ChangeIpProxyMiddleware(HttpProxyMiddleware):
     IPPOOL = [
         {"ipaddr": "117.156.242.138:80"},
         {"ipaddr": "124.133.230.254:80"},
-
+        {"ipaddr": "124.133.230.254:80"},
     ]
     # {"ipaddr": "182.117.102.10:8118"},
     #     {"ipaddr": "121.31.102.215:8123"},

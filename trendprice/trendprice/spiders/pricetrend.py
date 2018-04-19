@@ -2,7 +2,7 @@
 import scrapy, re
 import re
 from trendprice.items import PricetrendItem
-from urllib.parse import urljoin
+from urllib.parse import urljoin,unquote
 
 
 class PricetrendSpider(scrapy.Spider):
@@ -18,7 +18,7 @@ class PricetrendSpider(scrapy.Spider):
             'fangprice.pipelines.FangpricePipeline': 1,
         },
         # 'SPIDER_MIDDLEWARES': {
-        #     'fangprice.middlewares.FangpriceSpiderMiddleware': 543,
+        #
         # },
         # 'DOWNLOADER_MIDDLEWARES': {
         #     'fangprice.middlewares.ChangeUserAgentMiddleware': 80,
@@ -68,20 +68,19 @@ class PricetrendSpider(scrapy.Spider):
     # 爬取详细信息的方法
     def parse_second(self, response):
         # 使用同一个item
+        print(response.css('head > title::text')[0].extract())
         item = response.meta['item']
         # 读取详细信息
         chart_url = response.css('#fangjiazs > div.laybox > iframe').xpath("@src")[0].extract()
-        item['city'] = chart_url.split('=')[1].split('&')[0]
-        item['district'] = chart_url.split('=')[2].split('&')[0]
-        item['name'] = chart_url.split('=')[4].split('&')[0]
-        # item['name'] = response. \
-        #     xpath('//*[@id="body"]/div[6]/div[2]/div[1]/h1/strong/text()')[0].extract()
-        # newcode = re.findall("\d+",chart_url)[0]
-        item['newcode'] = chart_url.split('=')[3].split('&')[0]
-        muburl = self.dataurl + item['newcode']
-        item['url'] = muburl
+        mburl = chart_url.replace('makechart', 'MakeChartData')
+        # item['city'] = chart_url.split('=')[1].split('&')[0]
+        # item['district'] = chart_url.split('=')[2].split('&')[0]
+        # item['name'] = chart_url.split('=')[4].split('&')[0]
+        # item['newcode'] = chart_url.split('=')[3].split('&')[0]
+        # muburl = self.dataurl + item['newcode']
+        # item['url'] = muburl
         req = scrapy.Request(
-            url=muburl,
+            url=mburl,
             meta={'item': item},
             callback=self.parse_third,
             dont_filter=True
@@ -90,7 +89,14 @@ class PricetrendSpider(scrapy.Spider):
 
     def parse_third(self, response):
         item = response.meta['item']
+        item['city'] = unquote(response.url.split('=')[1].split('&')[0],encoding='utf8')
+        item['district'] = unquote(response.url.split('=')[2].split('&')[0], encoding='utf8')
+        item['name'] = unquote(response.url.split('=')[4].split('&')[0], encoding='utf8')
+        item['newcode'] = response.url.split('=')[3].split('&')[0]
+        item['url'] = response.url
         item['data'] = response.body.decode('gbk')
+        # muburl = self.dataurl + item['newcode']
+        # item['url'] = muburl
         print(item)
         # 保存item
         yield item
