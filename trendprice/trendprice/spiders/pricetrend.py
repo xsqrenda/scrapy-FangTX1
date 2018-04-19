@@ -2,7 +2,7 @@
 import scrapy, re
 import re
 from trendprice.items import PricetrendItem
-from urllib.parse import urljoin,unquote
+from urllib.parse import urljoin, unquote
 
 
 class PricetrendSpider(scrapy.Spider):
@@ -17,15 +17,19 @@ class PricetrendSpider(scrapy.Spider):
         'ITEM_PIPELINES': {
             'fangprice.pipelines.FangpricePipeline': 1,
         },
-        # 'SPIDER_MIDDLEWARES': {
-        #
-        # },
-        # 'DOWNLOADER_MIDDLEWARES': {
-        #     'fangprice.middlewares.ChangeUserAgentMiddleware': 80,
-        #     'scrapy.downloadermiddlewares.useragent.UserAgentMiddleware': None,
-        #     'fangprice.middlewares.ChangeIpProxyMiddleware': 104,
-        #     'scrapy.downloadermiddlewares.httpproxy.HttpProxyMiddleware': 105
-        # }
+        'RANDOMIZE_DOWNLOAD_DELAY': True ,
+        'DOWNLOAD_DELAY': 0.2,
+        'CONCURRENT_REQUESTS_PER_IP': 4,
+        'DOWNLOADER_MIDDLEWARES': {
+            'trendprice.middlewares.TrendpriceDownloaderMiddleware': 543,
+            'trendprice.middlewares.ChangeUserAgentMiddleware': 80,
+            'scrapy.downloadermiddlewares.useragent.UserAgentMiddleware': None,
+            'trendprice.middlewares.ChangeIpProxyMiddleware': 104,
+            'scrapy.downloadermiddlewares.httpproxy.HttpProxyMiddleware': 105, },
+        'SPIDER_MIDDLEWARES': {
+            'trendprice.middlewares.TrendpriceSpiderMiddleware': 543,
+        },
+
     }
 
     def parse(self, response):
